@@ -73,7 +73,7 @@ current cached copy."
 (defun tabbar-window-buffer-list ()
   "Return the list of buffers to show in tabs.
 Exclude internal buffers."
-  (apply #'nconc 
+  (apply #'nconc
 	 (mapcar
 	  (lambda (b)
 	    (cond
@@ -85,7 +85,7 @@ Exclude internal buffers."
 (defun window-number (window)
   "Return window ID as a number."
   (string-to-number
-   (nth 1 (save-match-data 
+   (nth 1 (save-match-data
 	    (split-string (format "%s" window)
 			  "\\(<window 0x\\|<window \\| on \\)" ))) 16))
 
@@ -128,7 +128,7 @@ displayed buffer.  Result is an alist of alists."
   tabbar-window-alist)
 
 
-;; avoid use of walk-windows 
+;; avoid use of walk-windows
 ;; incompatibility with ECB when called from some hook or
 ;; as idle timer function
 (defmacro tabbar-walk-windows (fun)
@@ -142,12 +142,12 @@ displayed buffer.  Result is an alist of alists."
 (defun window-number-get-window (wnumber)
   "Return window corresponding to ID number."
   (let (win)
-    (tabbar-walk-windows 
+    (tabbar-walk-windows
      (lambda (w)
        (if (= (window-number w) wnumber)
 	   (setq win w))))
     win))
-    
+
 
 (defvar tabbar-display-bug-workaround nil
 "Should tabbar work around a display bug?
@@ -193,8 +193,8 @@ Displayed buffers always get tabs."
 		  ;; workaround for redisplay bug
 		  (if (and tabbar-display-bug-workaround
 			   (> (length (window-list (window-frame window) 'no-minibuf)) 1))
-		      ;; this can cause a bit of flicker, but that's still better 
-		       (run-with-idle-timer 0 nil 'add-to-list 
+		      ;; this can cause a bit of flicker, but that's still better
+		       (run-with-idle-timer 0 nil 'add-to-list
 					    'header-line-inhibit-window-list window t)
 		    (add-to-list 'header-line-inhibit-window-list window t))
 		;; otherwise, ensure this window has a tabbar
@@ -206,7 +206,7 @@ Displayed buffers always get tabs."
 	  (setq header-line-inhibit-window-list
  		(delq window header-line-inhibit-window-list))))))
   tabbar-window-alist)
-   
+
 (defun tabbar-tabset-names ()
   "Return list of strings giving names of all tabsets"
   (tabbar-map-tabsets 'symbol-name))
@@ -343,7 +343,7 @@ That is, a string used to represent it on the tab bar."
 	  (popup-menu tabbar-context-menu-map event prefix))
 	 (t
 	  (set-window-dedicated-p (selected-window) nil)
-	  (let ((prevtab (tabbar-get-tab (window-buffer (selected-window)) 
+	  (let ((prevtab (tabbar-get-tab (window-buffer (selected-window))
 					 (tabbar-tab-tabset tab)))
 		(marker (cond ((bobp) (point-min-marker))
 			      ((eobp) (point-max-marker))
@@ -353,7 +353,7 @@ That is, a string used to represent it on the tab bar."
 		      'tab-points))
 	  (switch-to-buffer buffer)
 	  (let ((new-pt (cdr (assq tab tab-points))))
-	    (and new-pt 
+	    (and new-pt
 		 (eq (marker-buffer new-pt) (window-buffer (selected-window)))
 		 (let ((pos (marker-position new-pt)))
 		   (unless (eq pos (point))
@@ -400,11 +400,11 @@ specified BUFFER belongs."
     (not (remq tab (tabbar-tabs tabset)))))
 
 (defvar tabbar-retain-windows-when-tab-deleted '(not one-buffer-one-frame-mode)
-  "Expression that evaluates to t when windows are to be retained 
+  "Expression that evaluates to t when windows are to be retained
 ... after their buffer is killed.")
 
 (defun tabbar-window-delete-tab (tab)
-  "Delete the named TAB.  
+  "Delete the named TAB.
 First check whether there are other tabs remaining in the tabset.
 If so, we move to the next tab if available, otherwise previous,
 before deleting."
@@ -415,15 +415,15 @@ before deleting."
 	 (buflist (cdr window-elt))
 	 (buffer (tabbar-tab-value tab))
 	 (tabbar-display-bug-workaround nil)
-	 (sel    
+	 (sel
 	  (and (eq tab (tabbar-selected-tab tabset))
 	       ;; we need to ensure that the selected tab
 	       ;; corresponds to the currently shown buffer,
-	       ;; because we possibly haven't updated 
+	       ;; because we possibly haven't updated
 	       ;; the tabset since the last change
 	       ;; (e.g. find-alternate-file)
-	       (eq (window-buffer wind) 
-		   (tabbar-tab-value (tabbar-selected-tab 
+	       (eq (window-buffer wind)
+		   (tabbar-tab-value (tabbar-selected-tab
 				      tabset))))))
     ;; remove tab from tabbar-window-alist before deleting, so it won't be
     ;; regenerated
@@ -460,12 +460,12 @@ before deleting."
 (defun tabbar-window-close-tab (tab)
   "Remove tab and kill buffer if shown exclusively."
   ;; quit current command if in minibuffer
-  (when (minibuffer-window-active-p 
+  (when (minibuffer-window-active-p
        (minibuffer-window (selected-frame)))
       (abort-recursive-edit))
   (let* ((buffer (tabbar-tab-value tab))
 	 (killable (and
-		    (killable-buffer-p buffer))) 
+		    (killable-buffer-p buffer)))
 	 (dont-kill (tabbar-window-other-instances tab)))
     (when (and killable (not dont-kill))
       ;; ask before killing
@@ -476,10 +476,10 @@ before deleting."
 	    ;; a lot of buffers (e.g. dired) may be modified,
 	    ;; but have no file name
 	    (if (aquamacs-ask-for-confirmation
-		  (format "Save buffer %s to file before closing tab? 
-The buffer contains unsaved changes, which will be lost if you discard them now." (buffer-name)) 
+		  (format "Save buffer %s to file before closing tab?
+The buffer contains unsaved changes, which will be lost if you discard them now." (buffer-name))
 		 nil (format "Save%s" (if buffer-file-name "" "...")) "Don't Save" t)
-		(progn 
+		(progn
 		    (if (listp last-nonmenu-event)
 			(mac-key-save-file)
 		      (save-buffer))
@@ -565,7 +565,7 @@ Updates tabbar-window-alist in the same way."
 	;; we don't want to show any leftover tabs after the switch
 	;; so remove the buffer tab list for that window
 	(let ((window-alist (assq (window-number (selected-window)) tabbar-window-alist)))
-	  (setq tabbar-window-alist 
+	  (setq tabbar-window-alist
 		(delq window-alist tabbar-window-alist)))))))
 
 ;; The following shouldn't be done, because the normal switch-to-buffer
@@ -573,9 +573,9 @@ Updates tabbar-window-alist in the same way."
 ;; and always switches the buffer in the selected window.
 ;; doing what's shown below will create incompatibilities.
 ;; (when window-system
-;;   (defvar sw-in-tab-switching nil) 
-;;   (defadvice switch-to-buffer (around sw-in-tab (&rest args) 
-;; 				      activate compile protect) 
+;;   (defvar sw-in-tab-switching nil)
+;;   (defadvice switch-to-buffer (around sw-in-tab (&rest args)
+;; 				      activate compile protect)
 ;;     (if (and display-buffer-reuse-frames tabbar-mode
 ;; 	     (not sw-in-tab-switching))
 ;; 	(let ((sw-in-tab-switching t))
@@ -617,8 +617,8 @@ Turns on tabbar-mode if not already on."
   (interactive)
   (tabbar-mode 1)
   (let ((tabset-keep (or tabset (tabbar-current-tabset)))
-	(all-tabsets 
-	 (or source-tabsets 
+	(all-tabsets
+	 (or source-tabsets
 	     (mapcar 'tabbar-get-tabset (tabbar-tabset-names)))))
     ;; cycle through tabsets, except for current one
     (dolist (this-tabset all-tabsets)
@@ -640,7 +640,7 @@ shown in DEST-WINDOW."
   (tabbar-window-merge-windows
    (tabbar-window-current-tabset window)
    (mapcar 'tabbar-window-current-tabset
-	   (cdr-safe (window-list frame 'no-minibuf window))))) 
+	   (cdr-safe (window-list frame 'no-minibuf window)))))
 ;; exclude current window
 
 (defun tabbar-window-list-tabsets-to-save (&optional current-win)
@@ -691,7 +691,7 @@ shown in DEST-WINDOW."
 
 
 (defun tabbar-find-buffer (name file)
-  (or (and file 
+  (or (and file
 	   (find-buffer-visiting file))
       (get-buffer name)))
 
@@ -765,7 +765,7 @@ Update the templates if tabbar-template is currently nil."
 	 (tabset (tabbar-get-tabset (number-to-string (window-number window)))))
     ;; in the case where tabs have not yet been created, tabset will still be nil
     ;;  properly initialize all tabsets by running tabbar-window-update-tabsets
-    (unless tabset 
+    (unless tabset
       (setq tabset (tabbar-window-update-tabsets)))
     (if tabset ; update may say: display no tabs at all.
       (tabbar-select-tab-value (window-buffer window) tabset))

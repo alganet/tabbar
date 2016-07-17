@@ -1,10 +1,10 @@
 ;; Aquamacs tools
 ;; some helper functions for Aquamacs
- 
+
 ;; Author: David Reitter, david.reitter@gmail.com
 ;; Maintainer: David Reitter
 ;; Keywords: aquamacs
- 
+
 ;; This file is part of Aquamacs Emacs
 ;; http://www.aquamacs.org/
 
@@ -22,11 +22,11 @@
 ;; along with GNU Emacs; see the file COPYING.  If not, write to the
 ;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
- 
+
 ;; Copyright (C) 2005, 2007, 2009, 2013 David Reitter
 
 
-; remove an element from an associative list (alist) 
+; remove an element from an associative list (alist)
 ;; (defun remove-alist-name (name alist)
 ;;   "Removes element whose car is NAME from ALIST."
 ;;   (cond ((equal name (car (car alist)))	  ; found name
@@ -66,10 +66,10 @@ The return value is the incremented value of PLACE."
     (let ((f (window-frame (minibuffer-window))))
       (make-frame-visible f)
       (raise-frame f)			; make sure frame is visible
-      (if (or  
-	   (and last-nonmenu-event 
-		(not (consp last-nonmenu-event))) 
-	   ;;(not (eq (car-safe last-nonmenu-event)  
+      (if (or
+	   (and last-nonmenu-event
+		(not (consp last-nonmenu-event)))
+	   ;;(not (eq (car-safe last-nonmenu-event)
 	   ;;	  'mac-apple-event)))
 	   (not use-dialog-box)
 	   (not window-system))
@@ -83,8 +83,8 @@ The return value is the incremented value of PLACE."
 			    (match-string 1 text)
 			  text)))
 	      (if (and long (not aquamacs-quick-yes-or-no-prompt))
-		  (old-yes-or-no-p text)
-		(old-y-or-n-p text))))
+		  (y-or-n-p text)
+		(y-or-n-p text))))
 	(let ((ret (x-popup-dialog (or sheet (if (mouse-event-p last-command-event) last-command-event)
 				        `(mouse-1      (,(selected-window) 100 (0 . 50) -1)))
 				    (list text
@@ -101,7 +101,7 @@ The return value is the incremented value of PLACE."
 Creates a new list where all elements in ELEMENTS from LST
 are removed. Comparison is done with `eq'."
 
-(if (null lst) 
+(if (null lst)
     nil
   (if (member (car lst) elements)
       (filter-list (cdr lst) elements)
@@ -117,7 +117,7 @@ overwriting any previous associations in DEST"
 
 ; (setq test '((a . 1) (b . 2)))
 ; (assq-set-all '((b . 5) (c . 6)) 'test)
-      
+
 
 
 ; (assq-subtract '((asd . 3) (wqe . 5)) '((wqq . 3) (wqe . 5)))
@@ -127,7 +127,7 @@ overwriting any previous associations in DEST"
   "Subtracts alist B from A. Order of elements is NOT preserved.
 If IGNORE-VALUES is non-nil, alist elements with differing cdrs (values)
 are still subtracted."
-  
+
   (let ((ret))
     (mapc (lambda (x)
 	    (let ((p (assq (car x) b)))
@@ -153,8 +153,8 @@ New key-value pair will be in car of ALIST."
 		   (assq-delete-all-equal key (eval alist)))))
 
 (defun assq-string-equal (key alist)
-  
-  (loop for element in alist 
+
+  (loop for element in alist
         if (string-equal (car element) key)
 	return element))
 
@@ -168,7 +168,7 @@ New key-value pair will be in car of ALIST."
   (if (cdr-safe list)
       (aq-replace-in-list (cdr-safe list) from to)))
 
- 
+
 (defun assq-delete-all-equal (key alist)
   "Delete from ALIST all elements whose car is `equal' to KEY.
 Return the modified alist.
@@ -236,46 +236,46 @@ Each element of LIST has to be of the form (symbol . fontset)."
 		(not (fontset-exist-p (cdr e)))
 		)
 	   '(font . "fontset-standard")
-	 e)) 
+	 e))
      p))
   list))
 
-  
 
- 
+
+
 
 (defun get-bufname (buf)
    (if (eq (type-of buf) 'string)
 		    buf
 		  (buffer-name buf))
-	
+
 )
- 
+
 (defun get-bufobj (buf)
    (if (eq (type-of buf) 'string)
 		   (get-buffer buf)
 		  buf)
-	
+
 )
 
 (defun find-all-windows-internal (buffer &optional onlyvis)
-  "Find all windows that display a buffer." 
+  "Find all windows that display a buffer."
   (let ((windows nil))
     (walk-windows (lambda (wind)
-                     
-		     (if (eq (window-buffer wind) buffer) 
+
+		     (if (eq (window-buffer wind) buffer)
 			 (push wind windows))) t (if onlyvis 'visible t))
-    windows 
+    windows
     )
 )
 ; (find-all-frames-internal (current-buffer))
 (defun find-all-frames-internal (buffer &optional onlyvis)
-  (let ((frames nil)) 
+  (let ((frames nil))
     (walk-windows (lambda (wind)
-		  
+
                      (if (eq (window-buffer wind) buffer)
 			 (let ((frm (window-frame wind)))
-			    
+
 			   (unless (memq frm frames)
 			     (push frm frames)))))
                   nil (if onlyvis 'visible t))
@@ -290,11 +290,11 @@ Each element of LIST has to be of the form (symbol . fontset)."
   "All defaults in Aquamacs that are different from GNU Emacs.
 This customization group contains every default for customization
 variables that is changed in Aquamacs compared to GNU Emacs 22 or
-an additionally included package. 
-Note that non-customization variables as well as code may be 
+an additionally included package.
+Note that non-customization variables as well as code may be
 changed or advised in Aquamacs (compared to GNU Emacs), so reverting
 all of these defaults to their GNU Emacs value will not give you
-a GNU Emacs. To achieve that, use a self-compiled binary of 
+a GNU Emacs. To achieve that, use a self-compiled binary of
 Carbon Emacs instead of Aquamacs."
 :group 'Aquamacs)
 
@@ -312,18 +312,18 @@ Add the value to the customization group `Aquamacs-is-more-than-Emacs'."
 		 ;; it'll get loaded now before setting its defaults
 		 ;; (e.g. standard-value), which would otherwise be
 		 ;; overwritten.
-		 (old-doc 
+		 (old-doc
 		  (condition-case nil
-		      (documentation-property 
-		       symbol 
+		      (documentation-property
+		       symbol
 		       'variable-documentation)
 		    (error "")))
 		(value (car (cdr elt)))
 		(s-value (get symbol 'standard-value)))
 	    (set symbol value)
 	    (set-default symbol value) ;; new in post-0.9.5
- 
-	    ;; make sure that user customizations get 
+
+	    ;; make sure that user customizations get
 	    ;; saved to customizations.el (.emacs)
 	    ;; and that this appears as the new default.
 
@@ -344,9 +344,9 @@ Add the value to the customization group `Aquamacs-is-more-than-Emacs'."
 			(format "
 
 The original default (in GNU Emacs or in the package) was:
-%s" 
+%s"
 				s-value))))
-	      (custom-add-to-group 'Aquamacs-is-more-than-Emacs 
+	      (custom-add-to-group 'Aquamacs-is-more-than-Emacs
 				   symbol 'custom-variable))))
 	list))
 
@@ -377,11 +377,11 @@ Optional CODING is used for encoding coding-system."
 (defun load-post-sitestart-files ()
   "Load the Aquamacs plugins from site-start directories."
   (let (loaded)
-    (mapcar 
+    (mapcar
      (lambda (p) (unless (file-exists-p (concat p "/.ignore"))
 		   (let ((infod (concat p "/info"))
 			 (file (expand-file-name (concat p "/site-start") "~/")))
-		     
+
 		     (unless (member file loaded)
 		       (if (file-directory-p infod)
 			   (add-to-list 'Info-default-directory-list infod))
@@ -397,7 +397,7 @@ Optional CODING is used for encoding coding-system."
 (defun load-pre-sitestart-files ()
   "Load the pre-start Aquamacs plugins from site-prestart directories."
   (let (loaded)
-    (mapcar 
+    (mapcar
      (lambda (p) (unless (file-exists-p (concat p "/.ignore"))
 		   (let ((infod (concat p "/info"))
 			 (file (expand-file-name (concat p "/site-prestart") "~/")))
@@ -416,9 +416,9 @@ Optional CODING is used for encoding coding-system."
 
 (defun aq-current-milliseconds ()
   (let ((ti (cdr (current-time)))
-	
+
 	)
-    (+ (* 1000 (- (car ti) (car (cdr aq-timer)))) 
+    (+ (* 1000 (- (car ti) (car (cdr aq-timer))))
        (/ (- (car  (cdr ti))
 	  (car (cdr (cdr aq-timer)))
 	  ) 1000))))
@@ -432,10 +432,10 @@ Optional CODING is used for encoding coding-system."
 
 
 (defun aquamacs-pretty-mode-name (mode)
-  (capitalize 
+  (capitalize
    (replace-regexp-in-string "-mode" "" (symbol-name mode))))
 
-;; apple command character is unicode x2318  
+;; apple command character is unicode x2318
 ;;  (aq-describe-modifier 'hyper)
 (defun aq-describe-modifier (mod)
   ;; translate modifier
@@ -448,7 +448,7 @@ Optional CODING is used for encoding coding-system."
    ((and (boundp 'mac-option-modifier) (eq (or mac-option-modifier 'alt)
 					   mod))
     (string (decode-char 'ucs #X2325)))
-   ((and (boundp 'mac-control-modifier) (eq (or mac-control-modifier 'control) 
+   ((and (boundp 'mac-control-modifier) (eq (or mac-control-modifier 'control)
 					    mod))
     (string (decode-char 'ucs #X2303)))
    ((eq mod 'shift)
@@ -462,8 +462,8 @@ Optional CODING is used for encoding coding-system."
 
 (defvar apple-char (string (decode-char 'ucs #X2318)))
 
-;; The following is a big hack. The mac port can't currently cope 
-;; with putting the command key combos in the menu, for various 
+;; The following is a big hack. The mac port can't currently cope
+;; with putting the command key combos in the menu, for various
 ;; reasons (1. they are just secondary alternatives, 2. command is defined
 ;; as 'alt' and only known as such)
 
@@ -509,7 +509,7 @@ show BUFFER in that frame."
 
 (defcustom aquamacs-default-major-mode 'text-mode
   "Major mode in effect when new empty buffers are created.
-Specifies the major mode to be used for `new-empty-buffer' 
+Specifies the major mode to be used for `new-empty-buffer'
 and `new-empty-buffer-other-frame'."
   :group 'Aquamacs)
 
@@ -521,7 +521,7 @@ and `new-empty-buffer-other-frame'."
   "Visits an empty buffer.
 The major mode is set to MODE, or, if that is nil,
 the value of `aquamacs-default-major-mode'."
-  (interactive)			
+  (interactive)
   (let ((buf (generate-new-buffer (mac-new-buffer-name "untitled"))))
     ;; setting mode is done before showing the new frame
     ;; because otherwise, we get a nasty animation effect
@@ -574,7 +574,7 @@ Aquamacs only.
 	  (aquamacs-purge-directory (file-name-directory aquamacs-autosave-directory)
 			   ".*"
 			   days)))
-    (if (called-interactively-p) 
+    (if (called-interactively-p)
 	(message "%s Session and %s Auto save files older than %s days purged." count1 count2 days))))
 
 (defun aquamacs-purge-directory (directory regexp days)
@@ -593,9 +593,9 @@ Aquamacs only.
 			  regexp t))
 	count)
     (error 0)))
-   
 
- 
+
+
 
 (provide 'aquamacs-tools)
 

@@ -99,67 +99,22 @@ to be closed.  If no tab is specified, (tabbar-selected-tab) is used"
       (funcall tabbar-close-tab-function thetab))))
 
 
-;; change faces for better-looking tabs (and more obvious selected tab!)
-;; full face specification to avoid inheriting from the frame font
-;; or from mode-line
-(set-face-attribute 'tabbar-default nil
-		    :inherit nil
-		    :height 110
-		    :weight 'normal
-		    :width 'normal
-		    :slant 'normal
-		    :underline nil
-		    :strike-through nil
-;; inherit from frame		    :inverse-video
-		    :stipple nil
-		    :background "gray80"
-		    :foreground "black"
-;;		    :box '(:line-width 2 :color "white" :style nil)
-		    :box nil
-		    :family "Lucida Grande")
-
-(set-face-attribute 'tabbar-selected nil
-		    :background "gray95"
-		    :foreground "gray20"
-		    :inherit 'tabbar-default
-		    :box '(:line-width 3 :color "grey95" :style nil))
-;; 		    :box '(:line-width 2 :color "white" :style released-button))
-
-(set-face-attribute 'tabbar-unselected nil
-		    :inherit 'tabbar-default
-		    :background "gray80"
-		    :box '(:line-width 3 :color "grey80" :style nil))
-
 (defface tabbar-selected-highlight '((t
-		    :foreground "black"
-		    :background "gray95"))
+     :inherit tabbar-selected))
   "Face for selected, highlighted tabs."
   :group 'tabbar)
 
 (defface tabbar-unselected-highlight '((t
-                    ;; :foreground "black"
-		    ;; :background "grey75"
-		    ;; :box (:line-width 3 :color "grey75" :style nil)
+     :inherit tabbar-highlight
 					))
   "Face for unselected, highlighted tabs."
   :group 'tabbar)
-
-(set-face-attribute 'tabbar-button nil
-		    :inherit 'tabbar-default
-		    :box nil)
-
-(set-face-attribute 'tabbar-separator nil
-		    :background "grey50"
- 		    :foreground "grey50"
-		    :height 1.0)
 
 (setq tabbar-separator '(1)) ;; set tabbar-separator size to 1 pixel
 
 (defface tabbar-selected-modified
   '((t
      :inherit tabbar-selected
-     :weight bold
-     :height 110
      ))
   "Face used for unselected tabs."
   :group 'tabbar)
@@ -167,14 +122,12 @@ to be closed.  If no tab is specified, (tabbar-selected-tab) is used"
 (defface tabbar-unselected-modified
   '((t
      :inherit tabbar-unselected
-     :weight bold
-     :height 110
      ))
   "Face used for unselected tabs."
   :group 'tabbar)
 
 (defface tabbar-key-binding '((t
-				 :foreground "white"))
+     :inherit tabbar-default))
     "Face for unselected, highlighted tabs."
     :group 'tabbar)
 
@@ -412,80 +365,6 @@ if specified), in current window."
     (tabbar-buffer-show-groups nil)
     ))
 
-(defsubst tabbar-normalize-image (image &optional margin nomask)
-  "Make IMAGE centered and transparent.
-If optional MARGIN is non-nil, it must be a number of pixels to add as
-an extra margin around the image.  If optional NOMASK is non-nil, no mask
-property is included."
-  (let ((plist (cdr image)))
-    (or (plist-get plist :ascent)
-        (setq plist (plist-put plist :ascent 'center)))
-    (or (plist-get plist :mask)
-        (unless nomask
-	    (setq plist (plist-put plist :mask '(heuristic t)))))
-    (or (not (natnump margin))
-        (plist-get plist :margin)
-        (plist-put plist :margin margin))
-    (setcdr image plist))
-  image)
-
-;; use images for tabbar buttons
-(defun tabbar-button-label (name)
- ;; redefine tabbar-button-label to eliminate 1-pixel border around images
-  "Return a label for button NAME.
-That is a pair (ENABLED . DISABLED), where ENABLED and DISABLED are
-respectively the appearance of the button when enabled and disabled.
-They are propertized strings which could display images, as specified
-by the variable `tabbar-NAME-button'."
-  (let* ((btn (symbol-value
-               (intern-soft (format "tabbar-%s-button" name))))
-         (on  (tabbar-find-image (cdar btn)))
-         (off (and on (tabbar-find-image (cddr btn)))))
-    (when on
-      (tabbar-normalize-image on 0 t)
-      (if off
-          (tabbar-normalize-image off 0 t)
-        ;; If there is no disabled button image, derive one from the
-        ;; button enabled image.
-        (setq off (tabbar-disable-image on))))
-    (cons
-     (propertize (or (caar btn) " ") 'display on)
-     (propertize (or (cadr btn) " ") 'display off))))
-
-(defun tabbar-buffer-button-label (name)
- ;; redefine tabbar-buffer-button-label to eliminate 1-pixel border around images
-  "Return a label for button NAME.
-That is a pair (ENABLED . DISABLED), where ENABLED and DISABLED are
-respectively the appearance of the button when enabled and disabled.
-They are propertized strings which could display images, as specified
-by the variable `tabbar-button-label'.
-When NAME is 'home, return a different ENABLED button if showing tabs
-or groups.  Call the function `tabbar-button-label' otherwise."
-  (let ((lab (tabbar-button-label name)))
-    (when (eq name 'home)
-      (let* ((btn tabbar-buffer-home-button)
-             (on  (tabbar-find-image (cdar btn)))
-             (off (tabbar-find-image (cddr btn))))
-        ;; When `tabbar-buffer-home-button' does not provide a value,
-        ;; default to the enabled value of `tabbar-home-button'.
-        (if on
-            (tabbar-normalize-image on 0 t)
-          (setq on (get-text-property 0 'display (car lab))))
-        (if off
-            (tabbar-normalize-image off 0 t)
-          (setq off (get-text-property 0 'display (car lab))))
-        (setcar lab
-                (if tabbar--buffer-show-groups
-                    (propertize (or (caar btn) (car lab)) 'display on)
-                  (propertize (or (cadr btn) (car lab)) 'display off)))
-        ))
-    lab))
-
-(setq tabbar-home-button-enabled-image
-  '((:type png :file "down.png")))
-
-(setq tabbar-home-button-disabled-image
-  '((:type png :file "up.png")))
 
 (setq tabbar-home-button
   (cons (cons "[o]" tabbar-home-button-enabled-image)
@@ -604,15 +483,14 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 			  'tabbar-selected
 			'tabbar-unselected))
 	   (close-button
-	    (propertize "[x]"
+	    (propertize " × "
 			'tabbar-tab tab
 			'local-map (tabbar-make-tab-keymap tab)
 			'tabbar-action 'close-tab
 			;;	  'help-echo 'tabbar-help-on-tab ;; no help echo: it's redundant
 			'mouse-face mouse-face
 			'face text-face
-			'pointer 'arrow
-			'display (tabbar-normalize-image close-button-image 0 'nomask)))
+			'pointer 'arrow))
 
 	   (display-label
 	    (propertize (if tabbar-tab-label-function
@@ -648,7 +526,12 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 		       )
 		    "")
 		  ) "")))
-      (concat close-button display-label key-label tabbar-separator-value)))
+      (concat
+        display-label
+        ;; key-label
+        close-button
+        tabbar-separator-value
+        )))
 
 (defun tabbar-dummy-line-buttons (&optional noscroll)
   "Return a list of propertized strings for placeholders for the tab bar buttons.
@@ -697,7 +580,7 @@ NOSCROLL is non-nil, exclude the tabbar-scroll buttons."
        (car tabbar-home-button-value)
      (cdr tabbar-home-button-value))
    (if noscroll
-       (list (propertize " "
+       (list (propertize ""
                         'face 'tabbar-default
                         'display (list 'space :width (list 8)))
 	     ) ;; insert tabbar-separator-value here?

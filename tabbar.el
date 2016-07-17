@@ -570,94 +570,98 @@ current cached copy."
     ;; )
     (((class color grayscale) (background dark))
      :inherit variable-pitch
-     :height 0.8
-     :foreground "grey75"
-     :background "gray50"
      )
     (((class mono) (background light))
      :inherit variable-pitch
-     :height 0.8
-     :foreground "black"
-     :background "white"
      )
     (((class mono) (background dark))
      :inherit variable-pitch
-     :height 0.8
-     :foreground "white"
-     :background "black"
      )
     (t
      :inherit variable-pitch
-     :height 0.8
-     :foreground "gray50"
-     :background "gray75"
      ))
   "Default face used in the tab bar."
   :group 'tabbar)
 
 (defface tabbar-unselected
   '((t
-     :inherit tabbar-default
-     :box (:line-width 1 :color "white" :style released-button)
+     :inherit mode-line-inactive
      ))
   "Face used for unselected tabs."
   :group 'tabbar)
 
 (defface tabbar-selected
   '((t
-     :inherit tabbar-default
-     :box (:line-width 1 :color "white" :style pressed-button)
-     :foreground "blue"
+     :inherit mode-line
      ))
   "Face used for the selected tab."
   :group 'tabbar)
 
 (defface tabbar-modified
   '((t
-     :inherit tabbar-default
-     :box (:line-width 1 :color "white" :style released-button)
-     :foreground "green"
+     :inherit tabbar-unselected
      ))
   "Face used for unsaved tabs."
   :group 'tabbar)
 
 (defface tabbar-selected-modified
   '((t
-     :inherit tabbar-default
-     :box (:line-width 1 :color "white" :style released-button)
-     :foreground "red"
+     :inherit tabbar-selected
      ))
   "Face used for unsaved and selected tabs."
   :group 'tabbar)
 
 (defface tabbar-highlight
   '((t
-     :underline t
+     :inherit highlight
      ))
   "Face used to highlight a tab during mouse-overs."
   :group 'tabbar)
 
 (defface tabbar-separator
   '((t
-     :inherit tabbar-default
+     :inherit mode-line-inactive
      ))
   "Face used for separators between tabs."
   :group 'tabbar)
 
 (defface tabbar-button
   '((t
-     :inherit tabbar-default
-     :box (:line-width 1 :color "white" :style released-button)
+     :inherit mode-line-inactive
+    :bold t
      ))
   "Face used for tab bar buttons."
   :group 'tabbar)
 
 (defface tabbar-button-highlight
   '((t
-     :inherit tabbar-default
+     :inherit highlight
      ))
   "Face used to highlight a button during mouse-overs."
   :group 'tabbar)
+
+
+(set-face-attribute
+ 'tabbar-selected nil
+ :box `(
+    :line-width 6
+    :color ,(face-attribute 'mode-line :background)
+    :style nil
+    ))
+(set-face-attribute
+ 'tabbar-highlight nil
+ :box `(
+    :line-width 6
+    :color ,(face-attribute 'highlight :background)
+    :style nil
+    ))
+(set-face-attribute
+ 'tabbar-unselected nil
+ :box `(
+    :line-width 6
+    :color ,(face-attribute 'mode-line-inactive :background)
+    :style nil
+    ))
 
 (defcustom tabbar-background-color nil
   "*Background color of the tab bar.
