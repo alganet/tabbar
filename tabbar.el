@@ -561,38 +561,49 @@ current cached copy."
 ;;; Faces
 ;;
 (defface tabbar-default
-  '(
+  `(
     ;;(((class color grayscale) (background light))
     ;; :inherit variable-pitch
-    ;; :height 0.8
+    ;; :height 0.9
     ;; :foreground "gray50"
     ;; :background "grey75"
     ;; )
     (((class color grayscale) (background dark))
-     :inherit variable-pitch
+     :inherit mode-line-inactive
+     :family ,(face-attribute 'variable-pitch :family)
      )
     (((class mono) (background light))
-     :inherit variable-pitch
+     :inherit mode-line-inactive
+     :family ,(face-attribute 'variable-pitch :family)
      )
     (((class mono) (background dark))
-     :inherit variable-pitch
+     :inherit mode-line-inactive
+     :family ,(face-attribute 'variable-pitch :family)
      )
     (t
-     :inherit variable-pitch
+     :inherit mode-line-inactive
+     :family ,(face-attribute 'variable-pitch :family)
      ))
   "Default face used in the tab bar."
   :group 'tabbar)
 
 (defface tabbar-unselected
-  '((t
+  `((t
      :inherit mode-line-inactive
+     :box nil
+     :family ,(face-attribute 'variable-pitch :family)
+     :height 0.9
+     :underline nil
      ))
   "Face used for unselected tabs."
   :group 'tabbar)
 
 (defface tabbar-selected
-  '((t
-     :inherit mode-line
+  `((t
+     :inherit default
+     :family ,(face-attribute 'variable-pitch :family)
+     :height 0.9
+     :underline nil
      ))
   "Face used for the selected tab."
   :group 'tabbar)
@@ -600,27 +611,53 @@ current cached copy."
 (defface tabbar-modified
   '((t
      :inherit tabbar-unselected
+     :italic t
      ))
   "Face used for unsaved tabs."
+  :group 'tabbar)
+
+(defface tabbar-selected-highlight '((t
+     :inherit tabbar-selected))
+  "Face for selected, highlighted tabs."
+  :group 'tabbar)
+
+(defface tabbar-unselected-highlight '((t
+     :inherit tabbar-highlight
+          ))
+  "Face for unselected, highlighted tabs."
   :group 'tabbar)
 
 (defface tabbar-selected-modified
   '((t
      :inherit tabbar-selected
+     :italic t
      ))
-  "Face used for unsaved and selected tabs."
+  "Face used for unselected tabs."
   :group 'tabbar)
 
-(defface tabbar-highlight
+(defface tabbar-unselected-modified
   '((t
-     :inherit highlight
+     :inherit tabbar-unselected
+     :italic t
+     ))
+  "Face used for unselected tabs."
+  :group 'tabbar)
+
+
+(defface tabbar-highlight
+  `((t
+     :inherit mode-line-highlight
+     :family ,(face-attribute 'variable-pitch :family)
+     :height 0.9
+     :underline nil
      ))
   "Face used to highlight a tab during mouse-overs."
   :group 'tabbar)
 
 (defface tabbar-separator
-  '((t
-     :inherit mode-line-inactive
+  `((t
+      :inherit default
+      :height 1.8
      ))
   "Face used for separators between tabs."
   :group 'tabbar)
@@ -635,33 +672,10 @@ current cached copy."
 
 (defface tabbar-button-highlight
   '((t
-     :inherit highlight
+     :inherit mode-line-highlight
      ))
   "Face used to highlight a button during mouse-overs."
   :group 'tabbar)
-
-
-(set-face-attribute
- 'tabbar-selected nil
- :box `(
-    :line-width 6
-    :color ,(face-attribute 'mode-line :background)
-    :style nil
-    ))
-(set-face-attribute
- 'tabbar-highlight nil
- :box `(
-    :line-width 6
-    :color ,(face-attribute 'highlight :background)
-    :style nil
-    ))
-(set-face-attribute
- 'tabbar-unselected nil
- :box `(
-    :line-width 6
-    :color ,(face-attribute 'mode-line-inactive :background)
-    :style nil
-    ))
 
 (defcustom tabbar-background-color nil
   "*Background color of the tab bar.
@@ -746,8 +760,8 @@ P2 13 13 255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
   "Default image for the disabled home button.")
 
 (defcustom tabbar-home-button
-  (cons (cons "[o]" tabbar-home-button-enabled-image)
-        (cons "[x]" tabbar-home-button-disabled-image))
+  (cons (cons "" tabbar-home-button-enabled-image)
+        (cons "" tabbar-home-button-disabled-image))
   "The home button.
 The variable `tabbar-button-widget' gives details on this widget."
   :group 'tabbar
@@ -779,8 +793,8 @@ P2 13 13 255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
 A disabled button image will be automatically build from it.")
 
 (defcustom tabbar-scroll-left-button
-  (cons (cons " <" tabbar-scroll-left-button-enabled-image)
-        (cons " =" nil))
+  (cons (cons " « " tabbar-scroll-left-button-enabled-image)
+        (cons " · " nil))
   "The scroll left button.
 The variable `tabbar-button-widget' gives details on this widget."
   :group 'tabbar
@@ -812,8 +826,8 @@ P2 13 13 255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
 A disabled button image will be automatically build from it.")
 
 (defcustom tabbar-scroll-right-button
-  (cons (cons " >" tabbar-scroll-right-button-enabled-image)
-        (cons " =" nil))
+  (cons (cons " » " tabbar-scroll-right-button-enabled-image)
+        (cons " · " nil))
   "The scroll right button.
 The variable `tabbar-button-widget' gives details on this widget."
   :group 'tabbar
@@ -854,7 +868,7 @@ The variable `tabbar-separator-widget' gives details on this widget."
 
 ;;; Images
 ;;
-(defcustom tabbar-use-images t
+(defcustom tabbar-use-images nil
   "*Non-nil means to try to use images in tab bar.
 That is for buttons and separators."
   :group 'tabbar
@@ -1659,8 +1673,8 @@ Returns non-nil if the new state is enabled.
   :group 'tabbar)
 
 (defcustom tabbar-buffer-home-button
-  (cons (cons "[+]" tabbar-home-button-enabled-image)
-        (cons "[-]" tabbar-home-button-disabled-image))
+  (cons (cons "" tabbar-home-button-enabled-image)
+        (cons "" tabbar-home-button-disabled-image))
   "The home button displayed when showing buffer tabs.
 The enabled button value is displayed when showing tabs for groups of
 buffers, and the disabled button value is displayed when showing

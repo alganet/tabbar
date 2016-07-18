@@ -98,33 +98,9 @@ to be closed.  If no tab is specified, (tabbar-selected-tab) is used"
     (let ((thetab (or tab (tabbar-selected-tab))))
       (funcall tabbar-close-tab-function thetab))))
 
-
-(defface tabbar-selected-highlight '((t
-     :inherit tabbar-selected))
-  "Face for selected, highlighted tabs."
-  :group 'tabbar)
-
-(defface tabbar-unselected-highlight '((t
-     :inherit tabbar-highlight
-					))
-  "Face for unselected, highlighted tabs."
-  :group 'tabbar)
-
-(setq tabbar-separator '(1)) ;; set tabbar-separator size to 1 pixel
-
-(defface tabbar-selected-modified
-  '((t
-     :inherit tabbar-selected
-     ))
-  "Face used for unselected tabs."
-  :group 'tabbar)
-
-(defface tabbar-unselected-modified
-  '((t
-     :inherit tabbar-unselected
-     ))
-  "Face used for unselected tabs."
-  :group 'tabbar)
+(if window-system
+  (setq tabbar-separator '(3))
+  (setq tabbar-separator '(" ")))
 
 (defface tabbar-key-binding '((t
      :inherit tabbar-default))
@@ -366,13 +342,6 @@ if specified), in current window."
     ))
 
 
-(setq tabbar-home-button
-  (cons (cons "[o]" tabbar-home-button-enabled-image)
-        (cons "[x]" tabbar-home-button-disabled-image)))
-
-(setq tabbar-buffer-home-button
-  (cons (cons "[+]" tabbar-home-button-enabled-image)
-        (cons "[-]" tabbar-home-button-disabled-image)))
 
 (setq tabbar-scroll-left-button-enabled-image
   '((:type tiff :file "left.tiff")))
@@ -380,19 +349,11 @@ if specified), in current window."
 (setq tabbar-scroll-left-button-disabled-image
   '((:type tiff :file "left_disabled.tiff")))
 
-(setq tabbar-scroll-left-button
-  (cons (cons " <" tabbar-scroll-left-button-enabled-image)
-        (cons " =" tabbar-scroll-left-button-disabled-image)))
-
 (setq tabbar-scroll-right-button-enabled-image
   '((:type tiff :file "right.tiff")))
 
 (setq tabbar-scroll-right-button-disabled-image
   '((:type tiff :file "right_disabled.tiff")))
-
-(setq tabbar-scroll-right-button
-  (cons (cons " >" tabbar-scroll-right-button-enabled-image)
-        (cons " =" tabbar-scroll-right-button-disabled-image)))
 
 (setq tabbar-close-tab-button
       '((:type tiff :file "close-tab.tiff")))
@@ -485,6 +446,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 	   (close-button
 	    (propertize " × "
 			'tabbar-tab tab
+      'display '(raise 0.35)
 			'local-map (tabbar-make-tab-keymap tab)
 			'tabbar-action 'close-tab
 			;;	  'help-echo 'tabbar-help-on-tab ;; no help echo: it's redundant
@@ -500,6 +462,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 			'local-map (tabbar-make-tab-keymap tab)
 			;;	  'help-echo 'tabbar-help-on-tab ;; no help echo: it's redundant
 			'mouse-face mouse-face
+      'display '(raise 0.35)
 			'face (cond ((and selected-p
 					  (buffer-modified-p (tabbar-tab-value tab)))
 				     'tabbar-selected-modified)
@@ -527,6 +490,12 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 		    "")
 		  ) "")))
       (concat
+        (propertize " "
+          'tabbar-tab tab
+          'display '(raise 0.35)
+          'mouse-face mouse-face
+          'face text-face
+          'pointer 'arrow)
         display-label
         ;; key-label
         close-button
@@ -585,11 +554,15 @@ NOSCROLL is non-nil, exclude the tabbar-scroll buttons."
                         'display (list 'space :width (list 8)))
 	     ) ;; insert tabbar-separator-value here?
      (list (if (> (tabbar-start tabset) 0)
-	       (car tabbar-scroll-left-button-value)
-	     (cdr tabbar-scroll-left-button-value))
+	       (propertize (car tabbar-scroll-left-button-value)
+            'display '(raise 0.35))
+	     (propertize (cdr tabbar-scroll-left-button-value)
+            'display '(raise 0.35)))
 	   (if (tabbar-check-overflow tabset)
-	       (car tabbar-scroll-right-button-value)
-	     (cdr tabbar-scroll-right-button-value))
+	       (propertize (car tabbar-scroll-right-button-value)
+            'display '(raise 0.35))
+	     (propertize (cdr tabbar-scroll-right-button-value)
+            'display '(raise 0.35)))
 	   tabbar-separator-value))))
 
 (defun tabbar-line-format (tabset)
@@ -692,7 +665,7 @@ NOSCROLL is non-nil, exclude the tabbar-scroll buttons."
 ;; as it stands, we're duplicating some functions (buffer-modified check, e.g.)
 ;; and we're just guessing what face is going to be used.
 
-(defvar tabbar-char-width 5)
+(defvar tabbar-char-width 6)
 ;; (defun tabbar-char-width (&optional tab)
 ;;   "Big Hack."
 ;;   ;; average width of Lucida Grande character. Hack!
