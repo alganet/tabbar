@@ -570,19 +570,31 @@ current cached copy."
     ;; )
     (((class color grayscale) (background dark))
      :inherit mode-line-inactive
+     :italic nil
+     :box nil
      :family ,(face-attribute 'variable-pitch :family)
+     :height ,(face-attribute 'variable-pitch :height)
      )
     (((class mono) (background light))
      :inherit mode-line-inactive
+     :italic nil
+     :box nil
      :family ,(face-attribute 'variable-pitch :family)
+     :height ,(face-attribute 'variable-pitch :height)
      )
     (((class mono) (background dark))
      :inherit mode-line-inactive
+     :italic nil
+     :box nil
      :family ,(face-attribute 'variable-pitch :family)
+     :height ,(face-attribute 'variable-pitch :height)
      )
     (t
      :inherit mode-line-inactive
+     :italic nil
+     :box nil
      :family ,(face-attribute 'variable-pitch :family)
+     :height ,(face-attribute 'variable-pitch :height)
      ))
   "Default face used in the tab bar."
   :group 'tabbar)
@@ -591,8 +603,9 @@ current cached copy."
   `((t
      :inherit mode-line-inactive
      :box nil
+     :italic nil
      :family ,(face-attribute 'variable-pitch :family)
-     :height 0.9
+     :height ,(face-attribute 'variable-pitch :height)
      :underline nil
      ))
   "Face used for unselected tabs."
@@ -601,8 +614,9 @@ current cached copy."
 (defface tabbar-selected
   `((t
      :inherit default
+     :italic nil
      :family ,(face-attribute 'variable-pitch :family)
-     :height 0.9
+     :height ,(face-attribute 'variable-pitch :height)
      :underline nil
      ))
   "Face used for the selected tab."
@@ -647,8 +661,9 @@ current cached copy."
 (defface tabbar-highlight
   `((t
      :inherit mode-line-highlight
+     :italic nil
      :family ,(face-attribute 'variable-pitch :family)
-     :height 0.9
+     :height ,(face-attribute 'variable-pitch :height)
      :underline nil
      ))
   "Face used to highlight a tab during mouse-overs."
@@ -656,15 +671,14 @@ current cached copy."
 
 (defface tabbar-separator
   `((t
-      :inherit default
-      :height 1.8
+      :inherit tabbar-unselected
      ))
   "Face used for separators between tabs."
   :group 'tabbar)
 
 (defface tabbar-button
-  '((t
-     :inherit mode-line-inactive
+  `((t
+     :inherit tabbar-unselected
     :bold t
      ))
   "Face used for tab bar buttons."

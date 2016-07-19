@@ -425,7 +425,54 @@ Pass mouse click events on a tab to `tabbar-click-on-tab'."
        event
        (get-text-property (cdr target) 'tabbar-action (car target))))))
 
-(defcustom tabbar-show-key-bindings t
+
+(defsubst tabbar-normalize-image (image &optional margin face mask)
+  "Make IMAGE centered and transparent.
+If optional MARGIN is non-nil, it must be a number of pixels to add as
+an extra margin around the image.  If optional MASK is non-nil, mask
+property is included."
+  (when image
+    (let ((plist (cdr image))
+    (face (or face 'tabbar-default)))
+      (or (plist-get plist :ascent)
+    (setq plist (plist-put plist :ascent 'center)))
+      (or (plist-get plist :mask)
+    (when mask
+      (setq plist (plist-put plist :mask '(heuristic t)))))
+      (or (not (natnump margin))
+    ;; (plist-get plist :margin)
+    (plist-put plist :margin margin))
+      (and (facep face)
+     (plist-put plist :face face))
+      (setcdr image plist)))
+  image)
+
+
+(defun tabbar-line-right-separator (selected-p face background-face &optional dir
+                 normalize-face)
+  "Right separator for tabbar.
+SELECTED-P tells if the item is seleceted."
+  (when powerline-default-separator
+    (let* ((dir (or dir "left"))
+     (fun
+      (if (and selected-p (not (eq powerline-default-separator 'inherit)))
+    (intern (format "powerline-%s-%s" powerline-default-separator dir))
+        (intern (format "powerline-%s-%s" powerline-default-separator dir))))
+     (normalize-face (or normalize-face face)))
+      (propertize "|"
+      'display (tabbar-normalize-image (funcall fun background-face face 30) 0 normalize-face)
+      'face normalize-face))))
+
+(defun tabbar-line-left-separator (selected-p face background-face)
+  "Left separator for tabbar."
+  (or (tabbar-line-right-separator selected-p background-face face "right" face)
+      tabbar-separator-value))
+
+(defvar tabbar-line-mode-icon nil)
+
+
+
+(defcustom tabbar-show-key-bindings nil
   "Decide whether to number the tabs showing their key bindings."
   :group 'Aquamacs)
 
@@ -440,13 +487,22 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 			   'tabbar-selected-highlight
 			 'tabbar-unselected-highlight))
 
+   (background-face 'tabbar-default)
+(modified-p (buffer-modified-p (tabbar-tab-value tab)))
+   (face (if selected-p
+       (if modified-p
+           'tabbar-selected-modified
+         'tabbar-selected)
+     (if modified-p
+         'tabbar-unselected-modified
+       'tabbar-unselected)))
 	   (text-face (if selected-p
 			  'tabbar-selected
 			'tabbar-unselected))
 	   (close-button
 	    (propertize " × "
 			'tabbar-tab tab
-      'display '(raise 0.35)
+      'display '(raise 0)
 			'local-map (tabbar-make-tab-keymap tab)
 			'tabbar-action 'close-tab
 			;;	  'help-echo 'tabbar-help-on-tab ;; no help echo: it's redundant
@@ -462,7 +518,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 			'local-map (tabbar-make-tab-keymap tab)
 			;;	  'help-echo 'tabbar-help-on-tab ;; no help echo: it's redundant
 			'mouse-face mouse-face
-      'display '(raise 0.35)
+      'display '(raise 0)
 			'face (cond ((and selected-p
 					  (buffer-modified-p (tabbar-tab-value tab)))
 				     'tabbar-selected-modified)
@@ -490,16 +546,11 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 		    "")
 		  ) "")))
       (concat
-        (propertize " "
-          'tabbar-tab tab
-          'display '(raise 0.35)
-          'mouse-face mouse-face
-          'face text-face
-          'pointer 'arrow)
+        (tabbar-line-left-separator selected-p background-face face)
         display-label
         ;; key-label
         close-button
-        tabbar-separator-value
+        (tabbar-line-right-separator selected-p background-face face)
         )))
 
 (defun tabbar-dummy-line-buttons (&optional noscroll)
@@ -549,20 +600,20 @@ NOSCROLL is non-nil, exclude the tabbar-scroll buttons."
        (car tabbar-home-button-value)
      (cdr tabbar-home-button-value))
    (if noscroll
-       (list (propertize ""
+       (list (propertize " "
                         'face 'tabbar-default
                         'display (list 'space :width (list 8)))
 	     ) ;; insert tabbar-separator-value here?
      (list (if (> (tabbar-start tabset) 0)
 	       (propertize (car tabbar-scroll-left-button-value)
-            'display '(raise 0.35))
+            'display '(raise 0))
 	     (propertize (cdr tabbar-scroll-left-button-value)
-            'display '(raise 0.35)))
+            'display '(raise 0)))
 	   (if (tabbar-check-overflow tabset)
 	       (propertize (car tabbar-scroll-right-button-value)
-            'display '(raise 0.35))
+            'display '(raise 0))
 	     (propertize (cdr tabbar-scroll-right-button-value)
-            'display '(raise 0.35)))
+            'display '(raise 0)))
 	   tabbar-separator-value))))
 
 (defun tabbar-line-format (tabset)
@@ -686,7 +737,7 @@ buffer; see also `char-width'."
 	   (i  0))
       (cond
        ((< sw width)
-	(let* ((l-l (max 4 (min (- 75 (/ (* tabbar-char-width n) 2) )
+	(let* ((l-l (max 14 (min (- 75 (/ (* tabbar-char-width n) 2) )
 				(floor (/ (* (frame-char-width)
 					     (- width sw)) 2)))))
 	       (sp-r  (propertize
@@ -694,7 +745,7 @@ buffer; see also `char-width'."
 		       `(space
 			 :width
 			 ;; subtract width of numbers
-			 (, (max 4 (- l-l
+			 (, (max 14 (- l-l
 				      (if tabbar-show-key-bindings
 					  7 0)))))))
 	       (sp-l  (propertize
@@ -702,7 +753,7 @@ buffer; see also `char-width'."
 		       `(space
 			 :width
 			 ;; subtract the width of closer button. hard-coded for speed.
-			 (,(max 4 (- l-l 14)))))))
+			 (,(max 14 (- l-l 14)))))))
 	  (concat sp-l str sp-r)))
        (t str))))
 
