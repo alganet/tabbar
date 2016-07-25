@@ -102,6 +102,15 @@ to be closed.  If no tab is specified, (tabbar-selected-tab) is used"
   (setq tabbar-separator '(3))
   (setq tabbar-separator '(" ")))
 
+
+(if window-system
+  (setq tabbar-decorator "|")
+  (setq tabbar-decorator ""))
+
+(if window-system
+  (setq tabbar-gutter " ")
+  (setq tabbar-gutter ""))
+
 (defface tabbar-key-binding '((t
      :inherit tabbar-default))
     "Face for unselected, highlighted tabs."
@@ -459,7 +468,7 @@ SELECTED-P tells if the item is seleceted."
     (intern (format "powerline-%s-%s" powerline-default-separator dir))
         (intern (format "powerline-%s-%s" powerline-default-separator dir))))
      (normalize-face (or normalize-face face)))
-      (propertize "|"
+      (propertize tabbar-decorator
       'display (tabbar-normalize-image (funcall fun background-face face 30) 0 normalize-face)
       'face normalize-face))))
 
@@ -600,7 +609,7 @@ NOSCROLL is non-nil, exclude the tabbar-scroll buttons."
        (car tabbar-home-button-value)
      (cdr tabbar-home-button-value))
    (if noscroll
-       (list (propertize " "
+       (list (propertize tabbar-gutter
                         'face 'tabbar-default
                         'display (list 'space :width (list 8)))
 	     ) ;; insert tabbar-separator-value here?
